@@ -5,7 +5,7 @@ include("regress.jl")
 #include("CGS.jl")
 # Load JPL ephemerides from data and set units
 eph = Ephem("jup365.bsp") ; prefetch(eph)
-
+options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
 AU = 149597870.700 #km
 Random.seed!(42)
 # Find when body_id transits between jd1 and jd2 for observer at n_obs with N orbit integration steps 
@@ -14,7 +14,6 @@ function find_transit(body_id::Int,eph::CALCEPH.Ephem,jd1::Float64,jd2::Float64,
   ff = zeros(N)
   xdotn = 0.0
   pos = zeros(3,N) 
-    options = useNaifId+unitKM+unitDay # useNaifId + unitDay + unitAU
   # Compute functions of position and velocity, f(t)=dot(x_bar_sky, v_bar_sky) and f'(t):
   function calc_ffs(t)
     pva = compute(eph,JD_0,t,body_id,naifId.id[:jupiter],options,2)./AU
@@ -108,7 +107,7 @@ function fixed_noise(tt::Vector{Float64},sigma::Real)
       sigtt=0
       println("No noise added.")
   end
-  return sigtt,noise 
+  return sigtt 
 end
 # Do linear regression of transit times, given mean orbital period
 function linear_fit(tt::Vector{Float64},period::Float64,sigtt::Vector{Float64})
